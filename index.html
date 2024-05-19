@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Equestria.dev Packages</title>
+    <title>Equestria.dev Package Registry</title>
     <link rel="icon" href="/assets/favicon.png">
     <link rel="stylesheet" href="/assets/bootstrap.min.css">
     <style>
@@ -146,7 +146,9 @@
         }
 
         function fileToPlatform(file) {
-            let platform = Object.entries(window.config['platforms']['files']).find(i => i[1].includes(file))[0];
+            let matches = Object.entries(window.config['platforms']['files']).find(i => i[1].includes(file));
+            if (!matches) return "-";
+            let platform = matches[0];
             let parts = platform.split("-");
 
             parts[0] = (Object.entries(window.config['platforms']['names']['platforms']).find(i => i[0] === parts[0]) ?? [parts[0], parts[0]])[1];
@@ -319,7 +321,7 @@
                                 <b>Package info</b>
                                 <ul>
                                     <li>Upstream: <a target="_blank" href="${pkg.latestVersion.id.projectLink}">${pkg.latestVersion.id.projectLink}</a></li>
-                                    <li>License(s): ${prj['license']['nickname']}</li>
+                                    <li>License(s): ${prj['license'] ? prj['license']['nickname'] : "Unknown/All rights reserved"}</li>
                                     <li>Maintainers: equestria.dev</li>
                                 </ul>
                                 <hr>
