@@ -52,7 +52,16 @@
         }
 
         async function getPackages() {
-            let data = await (await fetch("https://source.equestria.dev/api/v4/groups/2/packages")).json();
+            let page = 1;
+            let data = [];
+            let lastData = [null];
+
+            while (lastData.length > 0) {
+                lastData = await (await fetch("https://source.equestria.dev/api/v4/groups/2/packages?page=" + page)).json();
+                data.push(...lastData);
+                page++;
+            }
+
             window.packages = {};
             window.config = await (await fetch("https://cdn.equestria.dev/pkgconfig.json")).json();
 
@@ -138,7 +147,17 @@
                     return "Mach-O shared object";
 
                 case "":
+                case "bin":
                     return "UNIX executable";
+
+                case "lctpk":
+                    return "Chatroom package";
+
+                case "otf":
+                    return "OpenType™ font";
+
+                case "apk":
+                    return "Android package";
 
                 default:
                     return "Unknown file";
@@ -168,7 +187,7 @@
                 document.getElementById("page").innerHTML = `
                 <div class="container">
                     <h2>Not found</h2>
-                    <p>The requested page could not be found on this website.</p>
+                    <p>The requested page could not be found on this website. If you were looking for a package, it might have been deleted from the registry.</p>
                 </div>
                 `;
             },
@@ -240,7 +259,7 @@
                             </tbody>
                         </table>
 
-                        <div class="version-grid" style="display: grid; grid-template-columns: 1fr 1fr; grid-gap: 20px; margin-top: 20px;">
+                        <!--<div class="version-grid" style="display: grid; grid-template-columns: 1fr 1fr; grid-gap: 20px; margin-top: 20px;">
                             <div>
                                 <h4>Dependencies</h4>
                                 <i>Dependencies are not supported in this version of the software.</i>
@@ -255,7 +274,7 @@
                                     ].sort((a, b) => a.localeCompare(b)).map(i => `<li>${i}</li>`).join("")}
                                 </ul>
                             </div>
-                        </div>
+                        </div>-->
                     </div>
                     `;
 
@@ -269,9 +288,8 @@
                         <h2>
                             ${pkg.name}
                         </h2>
-                        <p class="text-muted">${config['descriptions'][pkg.name] ? config['descriptions'][pkg.name][0] : '(no description)'}</p>
 
-                        <table class="table table-bordered">
+                        <table class="table table-bordered" style="margin-top: 10px;">
                             <tbody>
                                 <tr>
                                     <td class="col-1">
@@ -292,7 +310,7 @@
 
                         <div style="display: grid; grid-template-columns: 2fr 1fr; grid-gap: 20px;" class="pkg-grid">
                             <div>
-                                <p>${config['descriptions'][pkg.name] ? (config['descriptions'][pkg.name][1] === "@prj" ? prj['description'] : config['descriptions'][pkg.name][1]) : '<i>The maintainers have not yet provided a description for this package.</i>'}</p>
+                                <p>${prj['description'] ?? '<i>The maintainers have not yet provided a description for this package.</i>'}</p>
 
                                 <h3>Releases overview</h3>
                                 <table class="table">
